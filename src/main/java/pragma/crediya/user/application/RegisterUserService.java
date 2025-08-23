@@ -1,14 +1,11 @@
 package pragma.crediya.user.application;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import pragma.crediya.user.domain.User;
 import pragma.crediya.user.infrastructure.repository.UserEntity;
 import pragma.crediya.user.infrastructure.repository.UserRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import org.springframework.http.ResponseEntity;
-import java.util.Map;
 
 @Service
 public class RegisterUserService {
