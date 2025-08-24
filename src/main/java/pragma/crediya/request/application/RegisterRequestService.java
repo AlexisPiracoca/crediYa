@@ -3,10 +3,10 @@ package pragma.crediya.request.application;
 import org.springframework.stereotype.Service;
 import pragma.crediya.request.domain.model.LoanType;
 import pragma.crediya.request.domain.model.Status;
+import pragma.crediya.request.domain.ports.LoanTypeRepository;
+import pragma.crediya.request.domain.ports.StatusRepository;
 import pragma.crediya.request.domain.ports.RequestRepository;
-import pragma.crediya.request.domain.ports.DataLoanTypeRepository;
-import pragma.crediya.request.domain.ports.DataRequestRepository;
-import pragma.crediya.request.domain.ports.DataStatusRepository;
+import pragma.crediya.request.infrastructure.entity.RequestEntitiy;
 import pragma.crediya.request.infrastructure.mapper.RequestMapper;
 import reactor.core.publisher.Mono;
 import pragma.crediya.request.domain.model.Request;
@@ -16,30 +16,27 @@ import pragma.crediya.request.domain.model.Request;
 public class RegisterRequestService {
 
     private final RequestRepository requestRepository;
-    private final DataLoanTypeRepository loanTypeRepository;
-    private final DataStatusRepository statusRepository;
-    private final DataRequestRepository dataRequestRepository;
+    private final LoanTypeRepository loanTypeRepository;
+    private final StatusRepository statusRepository;
     private final RequestMapper mapper;
 
     public RegisterRequestService(
             RequestRepository requestRepository,
-            DataLoanTypeRepository loanTypeRepository,
-            DataStatusRepository statusRepository,
-            DataRequestRepository dataRequestRepository,
+            LoanTypeRepository loanTypeRepository,
+            StatusRepository statusRepository,
             RequestMapper mapper
     ) {
         this.requestRepository = requestRepository;
         this.loanTypeRepository = loanTypeRepository;
         this.statusRepository = statusRepository;
-        this.dataRequestRepository = dataRequestRepository;
         this.mapper = mapper;
     }
 
     public Mono<Request> registerRequest(Request request) {
-        return dataRequestRepository.existsByEmail(request.getEmail())
+        return requestRepository.existsByEmail(request.getEmail())
                 .flatMap(emailExists -> {
                     if (emailExists) {
-                        return Mono.error(new RuntimeException("El correo electrónico ya tiene una solicitud pendiente"));
+                        return Mono.error(new RuntimeException("El correo electrónico ya está registrado"));
                     }
                     return loanTypeRepository.findById(request.getLoanType().getId())
                             .switchIfEmpty(Mono.error(new RuntimeException("Tipo de préstamo no encontrado")))
@@ -63,7 +60,10 @@ public class RegisterRequestService {
                                                 request.setLoanType(loanType);
                                                 request.setStatus(status);
 
-                                                return requestRepository.save(request);
+                                                RequestEntitiy requestEntity = mapper.toEntity(request);
+
+                                                return requestRepository.save(requestEntity)
+                                                        .map(savedEntity -> mapper.toDomain(savedEntity, loanType, status));
                                             })
                             );
                 });

@@ -1,8 +1,11 @@
 package pragma.crediya.request.domain.ports;
 
-import pragma.crediya.request.domain.model.Request;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.stereotype.Repository;
+import pragma.crediya.request.infrastructure.entity.RequestEntitiy;
 import reactor.core.publisher.Mono;
 
-public interface RequestRepository {
-    Mono<Request> save(Request request);
+@Repository
+public interface RequestRepository extends ReactiveCrudRepository<RequestEntitiy, Long> {
+    Mono<Boolean> existsByEmail(String email);
 }
