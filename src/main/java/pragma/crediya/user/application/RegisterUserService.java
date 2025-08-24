@@ -1,34 +1,34 @@
 package pragma.crediya.user.application;
 
 import org.springframework.stereotype.Service;
-import pragma.crediya.user.domain.User;
-import pragma.crediya.user.infrastructure.repository.UserEntity;
-import pragma.crediya.user.infrastructure.repository.UserRepository;
+import pragma.crediya.user.domain.model.User;
+import pragma.crediya.user.infrastructure.entity.UserEntity;
+import pragma.crediya.user.domain.ports.UserRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
 public class RegisterUserService {
 
-    private final UserRepository userRepository;
+    private final UserRepository userRepositoryPort;
 
-    public RegisterUserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public RegisterUserService(UserRepository userRepositoryPort) {
+        this.userRepositoryPort = userRepositoryPort;
     }
 
     public Mono<User> register(User user) {
-        return userRepository.existsByEmail(user.getEmail())
+        return userRepositoryPort.existsByEmail(user.getEmail())
                 .flatMap(exists -> {
                     if (exists) {
                         return Mono.error(new RuntimeException("El correo ya está en uso"));
                     }
-                    return userRepository.save(mapToEntity(user))
+                    return userRepositoryPort.save(mapToEntity(user))
                             .map(this::mapToDomain);
                 });
     }
 
     public Flux<User> listAllUsers() {
-        return userRepository.findAll()
+        return userRepositoryPort.findAll()
                 .map(this::mapToDomain);
     }
 

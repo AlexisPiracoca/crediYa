@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pragma.crediya.user.application.RegisterUserService;
-import pragma.crediya.user.domain.User;
+import pragma.crediya.user.domain.model.User;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

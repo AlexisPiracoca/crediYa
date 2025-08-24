@@ -1,4 +1,4 @@
-package pragma.crediya.user.domain;
+package pragma.crediya.user.domain.model;
 
 import jakarta.validation.constraints.*;
 import lombok.*;

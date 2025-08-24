@@ -1,4 +1,4 @@
-package pragma.crediya.user.infrastructure.repository;
+package pragma.crediya.user.infrastructure.entity;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
