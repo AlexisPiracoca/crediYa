@@ -1,6 +1,7 @@
 package pragma.crediya.user.infrastructure.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,14 +11,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/usuarios")
 public class UserController {
 
     private final RegisterUserService registerUserService;
-
-    public UserController(RegisterUserService registerUserService) {
-        this.registerUserService = registerUserService;
-    }
 
     @PostMapping
     public Mono<ResponseEntity<User>> registerUser(@RequestBody @Valid User user) {
