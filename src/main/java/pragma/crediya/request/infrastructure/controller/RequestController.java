@@ -19,7 +19,6 @@ import reactor.core.publisher.Mono;
 public class RequestController {
 
     private final RegisterRequestService registerRequestService;
-    private final RequestRepository requestRepository;
 
     @PostMapping
     public Mono<ResponseEntity<Request>> registerUser(@RequestBody @Valid Request request) {
