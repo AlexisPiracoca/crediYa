@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pragma.crediya.request.application.RegisterRequestService;
 import pragma.crediya.request.domain.model.Request;
-import pragma.crediya.request.domain.ports.RequestRepository;
 import reactor.core.publisher.Mono;
 
 @RestController
