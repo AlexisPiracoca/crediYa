@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import pragma.crediya.user.domain.model.User;
 import pragma.crediya.user.infrastructure.entity.UserEntity;
 import pragma.crediya.user.infrastructure.mapper.UserMapper;
