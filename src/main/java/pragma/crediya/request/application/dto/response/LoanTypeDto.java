@@ -1,13 +1,11 @@
-package pragma.crediya.request.domain.model;
+package pragma.crediya.request.application.dto.response;
 
 import lombok.*;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoanType {
-
+public class LoanTypeDto {
     private Long id;
     private String name;
     private Double minAmount;

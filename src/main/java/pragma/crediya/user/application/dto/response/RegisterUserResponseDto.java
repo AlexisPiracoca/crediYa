@@ -1,14 +1,12 @@
-package pragma.crediya.user.domain.model;
+package pragma.crediya.user.application.dto.response;
 
 import lombok.*;
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
-
+public class RegisterUserResponseDto {
     private Long id;
     private String name;
     private String lastName;
@@ -17,5 +15,4 @@ public class User {
     private String phone;
     private String email;
     private Double salary;
-
 }

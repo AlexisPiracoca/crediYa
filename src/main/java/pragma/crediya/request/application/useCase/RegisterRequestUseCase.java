@@ -1,4 +1,4 @@
-package pragma.crediya.request.application;
+package pragma.crediya.request.application.useCase;
 
 import org.springframework.stereotype.Service;
 import pragma.crediya.request.domain.model.LoanType;
@@ -6,20 +6,20 @@ import pragma.crediya.request.domain.model.Status;
 import pragma.crediya.request.domain.ports.LoanTypeRepository;
 import pragma.crediya.request.domain.ports.StatusRepository;
 import pragma.crediya.request.domain.ports.RequestRepository;
-import pragma.crediya.request.infrastructure.entity.RequestEntitiy;
+import pragma.crediya.request.infrastructure.entity.RequestEntity;
 import pragma.crediya.request.infrastructure.mapper.RequestMapper;
 import reactor.core.publisher.Mono;
 import pragma.crediya.request.domain.model.Request;
 
 @Service
-public class RegisterRequestService {
+public class RegisterRequestUseCase {
 
     private final RequestRepository requestRepository;
     private final LoanTypeRepository loanTypeRepository;
     private final StatusRepository statusRepository;
     private final RequestMapper mapper;
 
-    public RegisterRequestService(
+    public RegisterRequestUseCase(
             RequestRepository requestRepository,
             LoanTypeRepository loanTypeRepository,
             StatusRepository statusRepository,
@@ -35,7 +35,7 @@ public class RegisterRequestService {
         return requestRepository.existsByEmail(request.getEmail())
                 .flatMap(emailExists -> {
                     if (emailExists) {
-                        return Mono.error(new RuntimeException("El correo electrónico ya está registrado"));
+                        return Mono.error(new RuntimeException("El correo electrónico ya cuenta con una solicitud pendiente"));
                     }
                     return loanTypeRepository.findById(request.getLoanType().getId())
                             .switchIfEmpty(Mono.error(new RuntimeException("Tipo de préstamo no encontrado")))
@@ -59,7 +59,7 @@ public class RegisterRequestService {
                                                 request.setLoanType(loanType);
                                                 request.setStatus(status);
 
-                                                RequestEntitiy requestEntity = mapper.toEntity(request);
+                                                RequestEntity requestEntity = mapper.toEntity(request);
 
                                                 return requestRepository.save(requestEntity)
                                                         .map(savedEntity -> mapper.toDomain(savedEntity, loanType, status));

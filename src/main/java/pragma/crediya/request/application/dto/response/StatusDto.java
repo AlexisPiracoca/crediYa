@@ -1,12 +1,11 @@
-package pragma.crediya.request.domain.model;
+package pragma.crediya.request.application.dto.response;
 
 import lombok.*;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Status {
+public class StatusDto {
     private Long id;
     private String name;
     private String description;

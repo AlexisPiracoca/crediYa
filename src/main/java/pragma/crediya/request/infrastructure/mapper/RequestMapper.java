@@ -4,13 +4,13 @@ import org.springframework.stereotype.Component;
 import pragma.crediya.request.domain.model.LoanType;
 import pragma.crediya.request.domain.model.Request;
 import pragma.crediya.request.domain.model.Status;
-import pragma.crediya.request.infrastructure.entity.RequestEntitiy;
+import pragma.crediya.request.infrastructure.entity.RequestEntity;
 
 @Component
 public class RequestMapper {
 
-    public RequestEntitiy toEntity(Request request) {
-        return new RequestEntitiy(
+    public RequestEntity toEntity(Request request) {
+        return new RequestEntity(
                 request.getId(),
                 request.getAmount(),
                 request.getTerm(),
@@ -20,7 +20,7 @@ public class RequestMapper {
         );
     }
 
-    public Request toDomain(RequestEntitiy entity, LoanType loanType, Status status) {
+    public Request toDomain(RequestEntity entity, LoanType loanType, Status status) {
         return new Request(
                 entity.getId(),
                 entity.getAmount(),
@@ -30,4 +30,5 @@ public class RequestMapper {
                 loanType
         );
     }
+
 }
