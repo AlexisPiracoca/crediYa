@@ -11,6 +11,9 @@ import pragma.crediya.request.infrastructure.mapper.RequestMapper;
 import reactor.core.publisher.Mono;
 import pragma.crediya.request.domain.model.Request;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class RegisterRequestUseCase {
 
@@ -32,39 +35,56 @@ public class RegisterRequestUseCase {
     }
 
     public Mono<Request> registerRequest(Request request) {
+        log.info("Iniciando registro de solicitud para email: {}", request.getEmail());
+
         return requestRepository.existsByEmail(request.getEmail())
+                .doOnNext(emailExists -> log.debug("¿Existe solicitud previa para {}? {}", request.getEmail(), emailExists))
                 .flatMap(emailExists -> {
                     if (emailExists) {
+                        log.warn("Solicitud rechazada: el correo {} ya tiene una solicitud pendiente.", request.getEmail());
                         return Mono.error(new RuntimeException("El correo electrónico ya cuenta con una solicitud pendiente"));
                     }
+
+                    log.info("Validando tipo de préstamo con ID: {}", request.getLoanType().getId());
                     return loanTypeRepository.findById(request.getLoanType().getId())
                             .switchIfEmpty(Mono.error(new RuntimeException("Tipo de préstamo no encontrado")))
-                            .flatMap(loanTypeEntity ->
-                                    statusRepository.findById(1L)
-                                            .switchIfEmpty(Mono.error(new RuntimeException("Estado Pendiente no encontrado")))
-                                            .flatMap(statusEntity -> {
-                                                LoanType loanType = new LoanType(
-                                                        loanTypeEntity.getId(),
-                                                        loanTypeEntity.getName(),
-                                                        loanTypeEntity.getMinAmount(),
-                                                        loanTypeEntity.getMaxAmount(),
-                                                        loanTypeEntity.getInterestRate(),
-                                                        loanTypeEntity.getAutoValidation()
-                                                );
-                                                Status status = new Status(
-                                                        statusEntity.getId(),
-                                                        statusEntity.getName(),
-                                                        statusEntity.getDescription()
-                                                );
-                                                request.setLoanType(loanType);
-                                                request.setStatus(status);
+                            .flatMap(loanTypeEntity -> {
+                                log.info("Tipo de préstamo encontrado: {}", loanTypeEntity.getName());
 
-                                                RequestEntity requestEntity = mapper.toEntity(request);
+                                log.info("Asignando estado inicial PENDIENTE (ID=1) a la solicitud");
+                                return statusRepository.findById(1L)
+                                        .switchIfEmpty(Mono.error(new RuntimeException("Estado Pendiente no encontrado")))
+                                        .flatMap(statusEntity -> {
+                                            log.debug("Estado encontrado: {}", statusEntity.getName());
 
-                                                return requestRepository.save(requestEntity)
-                                                        .map(savedEntity -> mapper.toDomain(savedEntity, loanType, status));
-                                            })
-                            );
-                });
+                                            LoanType loanType = new LoanType(
+                                                    loanTypeEntity.getId(),
+                                                    loanTypeEntity.getName(),
+                                                    loanTypeEntity.getMinAmount(),
+                                                    loanTypeEntity.getMaxAmount(),
+                                                    loanTypeEntity.getInterestRate(),
+                                                    loanTypeEntity.getAutoValidation()
+                                            );
+
+                                            Status status = new Status(
+                                                    statusEntity.getId(),
+                                                    statusEntity.getName(),
+                                                    statusEntity.getDescription()
+                                            );
+
+                                            request.setLoanType(loanType);
+                                            request.setStatus(status);
+
+                                            log.info("Guardando solicitud para email: {}", request.getEmail());
+                                            RequestEntity requestEntity = mapper.toEntity(request);
+
+                                            return requestRepository.save(requestEntity)
+                                                    .doOnSuccess(saved -> log.info("Solicitud guardada con ID: {}", saved.getId()))
+                                                    .map(savedEntity -> mapper.toDomain(savedEntity, loanType, status));
+                                        });
+                            });
+                })
+                .doOnError(error -> log.error("Error al registrar solicitud para {}: {}", request.getEmail(), error.getMessage()));
     }
 }
+
