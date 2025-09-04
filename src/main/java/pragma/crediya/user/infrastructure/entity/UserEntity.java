@@ -1,6 +1,9 @@
 package pragma.crediya.user.infrastructure.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.mapping.Column;
@@ -36,4 +39,10 @@ public class UserEntity {
 
     @Column("salary")
     private Double salary;
+
+    @Column("password")
+    private String password;
+
+    @Column("id_rol")
+    private Long rolId;
 }

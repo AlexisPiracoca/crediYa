@@ -1,40 +1,73 @@
 package pragma.crediya.user.application.handler;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.support.WebExchangeBindException;
 import pragma.crediya.user.application.dto.response.ErrorResponseDto;
-import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(WebExchangeBindException.class)
-    public Mono<ResponseEntity<ErrorResponseDto>> handleValidationException(WebExchangeBindException ex, ServerHttpRequest request) {
-        String message = ex.getFieldErrors()
-                .stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
-                .collect(Collectors.joining(", "));
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponseDto> handleRuntimeException(RuntimeException ex) {
+        log.error("Runtime exception occurred: {}", ex.getMessage());
+
         ErrorResponseDto error = new ErrorResponseDto(
-                400,
-                message,
-                LocalDateTime.now(),
-                request.getPath().value()
+                "400",
+                ex.getMessage()
         );
-        return Mono.just(ResponseEntity.badRequest().body(error));
+
+        return ResponseEntity.badRequest().body(error);
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDto> handleAccessDenied(AccessDeniedException ex) {
+        log.warn("Access denied: {}", ex.getMessage());
 
-    @ExceptionHandler(RuntimeException.class)
-    public Mono<ResponseEntity<Map<String, String>>> handleRuntimeException(RuntimeException ex) {
-        return Mono.just(ResponseEntity.badRequest().body(Map.of("error", ex.getMessage())));
+        ErrorResponseDto error = new ErrorResponseDto(
+                "403",
+                "No tiene permisos para acceder a este recurso",
+                ex.getMessage()
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponseDto> handleValidationErrors(MethodArgumentNotValidException ex) {
+        log.warn("Validation error occurred");
+
+        String errorMessage = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        ErrorResponseDto error = new ErrorResponseDto(
+                "400",
+                "Datos de entrada inválidos",
+                errorMessage
+        );
+
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex) {
+        log.error("Unexpected error occurred: ", ex);
+
+        ErrorResponseDto error = new ErrorResponseDto(
+                "500",
+                "Error interno del servidor"
+        );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }
-
 

@@ -87,4 +87,3 @@ public class RegisterRequestUseCase {
                 .doOnError(error -> log.error("Error al registrar solicitud para {}: {}", request.getEmail(), error.getMessage()));
     }
 }
-

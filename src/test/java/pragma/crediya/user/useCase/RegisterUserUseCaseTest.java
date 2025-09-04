@@ -71,7 +71,7 @@ class RegisterUserUseCaseTest {
     @DisplayName("Debe registrar el usuario exitosamente")
     void shouldRegisterUserSuccessfully_WhenEmailDoesNotExist() {
         User expectedUser = new User(1L, "Juan", "Pérez", LocalDate.of(1990, 1, 1),
-                "Calle 123", "123456789", "juan@test.com", 5000000.0);
+                "Calle 123", "123456789", "juan@test.com", 5000000.0, null, null);
 
         when(userRepository.existsByEmail("juan@test.com")).thenReturn(Mono.just(false));
         when(userMapper.toEntity(testUser)).thenReturn(testUserEntity);

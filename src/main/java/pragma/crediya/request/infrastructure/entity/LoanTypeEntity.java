@@ -16,7 +16,6 @@ import org.springframework.data.relational.core.mapping.Table;
 public class LoanTypeEntity {
 
     @Id
-    @Column("id_loan_type")
     private Long id;
 
     @Column("name")

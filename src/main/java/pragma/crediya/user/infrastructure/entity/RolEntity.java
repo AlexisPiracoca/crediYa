@@ -1,4 +1,4 @@
-package pragma.crediya.request.infrastructure.entity;
+package pragma.crediya.user.infrastructure.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,28 +8,16 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Table("request")
+@Table("rol")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RequestEntity {
-
+public class RolEntity {
     @Id
     private Long id;
-
-    @Column("amount")
-    private Double amount;
-
-    @Column("term")
-    private Integer term;
-
-    @Column("email")
-    private String email;
-
-    @Column("status_id")
-    private Long statusId;
-
-    @Column("loan_type_id")
-    private Long loanTypeId;
+    @Column("name")
+    private String name;
+    @Column("description")
+    private String description;
 }

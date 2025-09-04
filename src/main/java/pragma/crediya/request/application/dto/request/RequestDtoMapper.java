@@ -7,10 +7,13 @@ import pragma.crediya.request.application.dto.response.StatusDto;
 import pragma.crediya.request.domain.model.LoanType;
 import pragma.crediya.request.domain.model.Request;
 import pragma.crediya.request.domain.model.Status;
+import pragma.crediya.request.infrastructure.entity.LoanTypeEntity;
+import pragma.crediya.request.infrastructure.entity.StatusEntity;
 
 @Component
 public class RequestDtoMapper {
 
+    // ---- Domain mappers ----
     public Request toDomain(RegisterRequestDto dto) {
         Request request = new Request();
         request.setAmount(dto.getAmount());
@@ -35,7 +38,8 @@ public class RequestDtoMapper {
         );
     }
 
-    private StatusDto toStatusDto(Status status) {
+    // ---- Domain to DTO ----
+    public StatusDto toStatusDto(Status status) {
         return new StatusDto(
                 status.getId(),
                 status.getName(),
@@ -43,7 +47,7 @@ public class RequestDtoMapper {
         );
     }
 
-    private LoanTypeDto toLoanTypeDto(LoanType loanType) {
+    public LoanTypeDto toLoanTypeDto(LoanType loanType) {
         return new LoanTypeDto(
                 loanType.getId(),
                 loanType.getName(),
@@ -51,6 +55,26 @@ public class RequestDtoMapper {
                 loanType.getMaxAmount(),
                 loanType.getInterestRate(),
                 loanType.getAutoValidation()
+        );
+    }
+
+    // ---- Entity to DTO ----
+    public StatusDto toStatusDto(StatusEntity entity) {
+        return new StatusDto(
+                entity.getId(),
+                entity.getName(),
+                entity.getDescription()
+        );
+    }
+
+    public LoanTypeDto toLoanTypeDto(LoanTypeEntity entity) {
+        return new LoanTypeDto(
+                entity.getId(),
+                entity.getName(),
+                entity.getMinAmount(),
+                entity.getMaxAmount(),
+                entity.getInterestRate(),
+                entity.getAutoValidation()
         );
     }
 }

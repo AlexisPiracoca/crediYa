@@ -1,25 +1,27 @@
 package pragma.crediya.user.application.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Respuesta de error estándar")
+@Schema(description = "DTO para respuestas de error")
 public class ErrorResponseDto {
 
-    @Schema(description = "Código de error", example = "400")
-    private Integer code;
+    @Schema(description = "Código de error HTTP", example = "400")
+    private String codigo;
 
-    @Schema(description = "Mensaje de error", example = "El correo electrónico ya está registrado")
-    private String message;
+    @Schema(description = "Mensaje descriptivo del error", example = "Datos inválidos")
+    private String mensaje;
 
-    @Schema(description = "Timestamp del error", example = "2024-01-15T10:30:00")
-    private LocalDateTime timestamp = LocalDateTime.now();
+    @Schema(description = "Detalle adicional del error", example = "El campo email es requerido")
+    private String detalle;
 
-    @Schema(description = "Ruta donde ocurrió el error", example = "/api/v1/usuarios")
-    private String path;
+    public ErrorResponseDto(String codigo, String mensaje) {
+        this.codigo = codigo;
+        this.mensaje = mensaje;
+    }
 }

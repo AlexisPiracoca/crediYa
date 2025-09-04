@@ -5,21 +5,15 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
 @Getter
-public class UserListResponseDto {
+public class UserBasicInfoDto {
     private Long id;
-    private String name;
-    private String lastName;
-    private LocalDate dateBirth;
-    private String address;
-    private String phone;
+    private String nombre;
     private String email;
-    private Double salary;
-    private Long rolId;
+    private String rol;
 }

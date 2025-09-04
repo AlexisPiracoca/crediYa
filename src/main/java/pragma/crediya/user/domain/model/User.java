@@ -1,6 +1,9 @@
 package pragma.crediya.user.domain.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.LocalDate;
 
 @Getter
@@ -17,5 +20,7 @@ public class User {
     private String phone;
     private String email;
     private Double salary;
+    private String password;
+    private Rol rol;
 
 }

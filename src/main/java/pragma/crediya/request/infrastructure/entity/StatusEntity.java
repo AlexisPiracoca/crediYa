@@ -16,7 +16,6 @@ import org.springframework.data.relational.core.mapping.Table;
 public class StatusEntity {
 
     @Id
-    @Column("id_status")
     private Long id;
 
     @Column("name")

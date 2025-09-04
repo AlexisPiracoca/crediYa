@@ -1,4 +1,4 @@
-package pragma.crediya.request.domain.model;
+package pragma.crediya.user.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,12 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoanType {
-
+public class Rol {
     private Long id;
     private String name;
-    private Double minAmount;
-    private Double maxAmount;
-    private Double interestRate;
-    private Boolean autoValidation;
+    private String description;
 }

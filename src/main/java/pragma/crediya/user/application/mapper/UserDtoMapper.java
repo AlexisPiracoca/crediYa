@@ -1,23 +1,31 @@
-package pragma.crediya.user.application.dto.request;
+package pragma.crediya.user.application.mapper;
 
 import org.springframework.stereotype.Component;
+import pragma.crediya.user.application.dto.request.RegisterUserDto;
 import pragma.crediya.user.application.dto.response.RegisterUserResponseDto;
 import pragma.crediya.user.application.dto.response.UserListResponseDto;
+import pragma.crediya.user.domain.model.Rol;
 import pragma.crediya.user.domain.model.User;
 
 @Component
 public class UserDtoMapper {
 
     public User toDomain(RegisterUserDto dto) {
-        User user = new User();
-        user.setName(dto.getName());
-        user.setLastName(dto.getLastName());
-        user.setDateBirth(dto.getDateBirth());
-        user.setAddress(dto.getAddress());
-        user.setPhone(dto.getPhone());
-        user.setEmail(dto.getEmail());
-        user.setSalary(dto.getSalary());
-        return user;
+        Rol rol = new Rol();
+        rol.setId(dto.getRolId());
+
+        return new User(
+                null,
+                dto.getName(),
+                dto.getLastName(),
+                dto.getDateBirth(),
+                dto.getAddress(),
+                dto.getPhone(),
+                dto.getEmail(),
+                dto.getSalary(),
+                dto.getPassword(),
+                rol
+        );
     }
 
     public RegisterUserResponseDto toRegisterResponseDto(User domain) {
@@ -29,7 +37,8 @@ public class UserDtoMapper {
                 domain.getAddress(),
                 domain.getPhone(),
                 domain.getEmail(),
-                domain.getSalary()
+                domain.getSalary(),
+                domain.getRol() != null ? domain.getRol().getId() : null
         );
     }
 
@@ -42,7 +51,9 @@ public class UserDtoMapper {
                 domain.getAddress(),
                 domain.getPhone(),
                 domain.getEmail(),
-                domain.getSalary()
+                domain.getSalary(),
+                domain.getRol() != null ? domain.getRol().getId() : null
         );
     }
 }
+

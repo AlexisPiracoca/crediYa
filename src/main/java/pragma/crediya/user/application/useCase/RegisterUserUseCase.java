@@ -1,5 +1,6 @@
 package pragma.crediya.user.application.useCase;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pragma.crediya.user.domain.model.User;
 import pragma.crediya.user.domain.ports.UserRepository;
@@ -14,10 +15,14 @@ public class RegisterUserUseCase {
 
     private final UserRepository userRepositoryPort;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder; // 👈 inyecta el encoder
 
-    public RegisterUserUseCase(UserRepository userRepositoryPort, UserMapper userMapper) {
+    public RegisterUserUseCase(UserRepository userRepositoryPort,
+                               UserMapper userMapper,
+                               PasswordEncoder passwordEncoder) {
         this.userRepositoryPort = userRepositoryPort;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Mono<User> register(User user) {
@@ -31,6 +36,9 @@ public class RegisterUserUseCase {
                         return Mono.error(new RuntimeException("El correo ya está en uso"));
                     }
                     log.info("Guardando nuevo usuario con email: {}", user.getEmail());
+
+                    user.setPassword(passwordEncoder.encode(user.getPassword()));
+
                     return userRepositoryPort.save(userMapper.toEntity(user))
                             .doOnSuccess(saved -> log.info("Usuario guardado con ID: {}", saved.getId()))
                             .map(userMapper::toDomain);
@@ -46,3 +54,4 @@ public class RegisterUserUseCase {
                 .doOnComplete(() -> log.info("Consulta de usuarios completada."));
     }
 }
+
