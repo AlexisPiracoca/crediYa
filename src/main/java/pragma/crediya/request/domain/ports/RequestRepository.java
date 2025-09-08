@@ -10,4 +10,6 @@ public interface RequestRepository {
     Flux<RequestEntity> findAll();
     Flux<RequestEntity> findByEmail(String email);
     Mono<RequestEntity> findById(Long id);
+    Mono<RequestEntity> updateStatus(Long id, Long statusId);
+
 }

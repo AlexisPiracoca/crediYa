@@ -14,4 +14,9 @@ public class LoanTypeDto {
     private Double maxAmount;
     private Double interestRate;
     private Boolean autoValidation;
+
+    public LoanTypeDto(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

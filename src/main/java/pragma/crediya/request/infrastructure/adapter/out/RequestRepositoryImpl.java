@@ -3,6 +3,7 @@ package pragma.crediya.request.infrastructure.adapter.out;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
+import org.springframework.data.relational.core.query.Update;
 import org.springframework.stereotype.Repository;
 import pragma.crediya.request.domain.ports.RequestRepository;
 import pragma.crediya.request.infrastructure.entity.RequestEntity;
@@ -50,5 +51,18 @@ public class RequestRepositoryImpl implements RequestRepository {
                 Query.query(Criteria.where("id").is(id)),
                 RequestEntity.class
         );
+    }
+
+    @Override
+    public Mono<RequestEntity> updateStatus(Long id, Long statusId) {
+        return template.selectOne(Query.query(Criteria.where("id").is(id)), RequestEntity.class)
+                .switchIfEmpty(Mono.error(new RuntimeException("Solicitud no encontrada")))
+                .flatMap(request -> {
+                    request.setStatusId(statusId);
+                    return template.update(RequestEntity.class)
+                            .matching(Query.query(Criteria.where("id").is(id)))
+                            .apply(Update.update("status_id", statusId))
+                            .thenReturn(request);
+                });
     }
 }

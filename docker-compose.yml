@@ -1,0 +1,66 @@
+services:
+  user-service:
+    build:
+      context: .
+      dockerfile: src/main/java/pragma/crediya/user/Dockerfile
+    container_name: user-service
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_R2DBC_URL=r2dbc:postgresql://db:5432/crediYa
+      - SPRING_R2DBC_USERNAME=postgres
+      - SPRING_R2DBC_PASSWORD=12345
+    expose:
+      - "8081"
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  request-service:
+    build:
+      context: .
+      dockerfile: src/main/java/pragma/crediya/request/Dockerfile
+    container_name: request-service
+    environment:
+      - SERVER_PORT=8082
+      - SPRING_R2DBC_URL=r2dbc:postgresql://db:5432/crediYa
+      - SPRING_R2DBC_USERNAME=postgres
+      - SPRING_R2DBC_PASSWORD=12345
+    expose:
+      - "8082"
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  db:
+    image: postgres:17
+    container_name: crediYa
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  nginx:
+    image: nginx:latest
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - user-service
+      - request-service
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  postgres_data:

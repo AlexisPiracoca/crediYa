@@ -46,5 +46,11 @@ public class AuthorizationService {
                 .anyMatch(granted -> granted.getAuthority().equals("Cliente"));
         return isClient && auth.getName().equals(requestEmail);
     }
+
+    public boolean canApproveRequest(Authentication auth) {
+        return auth.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("Asesor"));
+    }
+
 }
 

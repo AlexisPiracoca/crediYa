@@ -1,5 +1,6 @@
 package pragma.crediya.request.application.useCase;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pragma.crediya.request.application.dto.response.LoanTypeDto;
@@ -18,22 +19,13 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GetRequestsByEmailUseCase {
 
     private final RequestRepository requestRepository;
     private final RequestMapper mapper;
     private final LoanTypeRepository loanTypeRepository;
     private final StatusRepository statusRepository;
-
-    public GetRequestsByEmailUseCase(RequestRepository requestRepository,
-                                     RequestMapper mapper,
-                                     LoanTypeRepository loanTypeRepository,
-                                     StatusRepository statusRepository) {
-        this.requestRepository = requestRepository;
-        this.mapper = mapper;
-        this.loanTypeRepository = loanTypeRepository;
-        this.statusRepository = statusRepository;
-    }
 
     public Flux<Request> execute(String email) {
         log.info("Consultando solicitudes para el email: {}", email);

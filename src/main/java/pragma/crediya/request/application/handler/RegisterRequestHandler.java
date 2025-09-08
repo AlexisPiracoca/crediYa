@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pragma.crediya.request.application.dto.request.RegisterRequestDto;
 import pragma.crediya.request.application.dto.request.RequestDtoMapper;
+import pragma.crediya.request.application.dto.response.LoanTypeDto;
 import pragma.crediya.request.application.dto.response.RegisterRequestResponseDto;
+import pragma.crediya.request.application.dto.response.StatusDto;
+import pragma.crediya.request.application.useCase.ApproveRejectRequestUseCase;
 import pragma.crediya.request.application.useCase.GetRequestsByEmailUseCase;
 import pragma.crediya.request.application.useCase.RegisterRequestUseCase;
 import pragma.crediya.request.domain.model.Request;
@@ -27,6 +30,7 @@ public class RegisterRequestHandler {
     private final LoanTypeJpaRepository loanTypeRepository;
     private final GetRequestsByEmailUseCase getRequestsByEmailUseCase;
     private final RequestMapper requestMapper;
+    private final ApproveRejectRequestUseCase approveRejectRequestUseCase;
 
     // POST
     public Mono<RegisterRequestResponseDto> handle(RegisterRequestDto requestDto) {
@@ -80,5 +84,26 @@ public class RegisterRequestHandler {
     public Flux<RegisterRequestResponseDto> getRequestsByEmail(String email) {
         return getRequestsByEmailUseCase.execute(email)
                 .map(dtoMapper::toResponseDto);
+    }
+
+    public Mono<RegisterRequestResponseDto> updateDecision(Long id, Long statusId) {
+        return statusRepository.findById(statusId)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("El estado con id " + statusId + " no existe")))
+                .flatMap(status ->
+                        requestRepository.findById(id)
+                                .switchIfEmpty(Mono.error(new IllegalArgumentException("La solicitud con id " + id + " no existe")))
+                                .flatMap(request -> {
+                                    request.setStatusId(statusId);
+                                    return requestRepository.save(request);
+                                })
+                                .map(saved -> new RegisterRequestResponseDto(
+                                        saved.getId(),
+                                        saved.getAmount(),
+                                        saved.getTerm(),
+                                        saved.getEmail(),
+                                        new StatusDto(status.getId(), status.getName(), status.getDescription()),
+                                        new LoanTypeDto(saved.getLoanTypeId(), null, null, null, null, null)
+                                ))
+                );
     }
 }

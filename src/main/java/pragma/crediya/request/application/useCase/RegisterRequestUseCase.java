@@ -1,5 +1,6 @@
 package pragma.crediya.request.application.useCase;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pragma.crediya.request.domain.model.LoanType;
 import pragma.crediya.request.domain.model.Status;
@@ -15,24 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class RegisterRequestUseCase {
 
     private final RequestRepository requestRepository;
     private final LoanTypeRepository loanTypeRepository;
     private final StatusRepository statusRepository;
     private final RequestMapper mapper;
-
-    public RegisterRequestUseCase(
-            RequestRepository requestRepository,
-            LoanTypeRepository loanTypeRepository,
-            StatusRepository statusRepository,
-            RequestMapper mapper
-    ) {
-        this.requestRepository = requestRepository;
-        this.loanTypeRepository = loanTypeRepository;
-        this.statusRepository = statusRepository;
-        this.mapper = mapper;
-    }
 
     public Mono<Request> registerRequest(Request request) {
         log.info("Iniciando registro de solicitud para email: {}", request.getEmail());

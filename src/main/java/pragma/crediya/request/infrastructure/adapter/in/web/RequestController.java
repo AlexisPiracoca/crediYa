@@ -1,7 +1,6 @@
 package pragma.crediya.request.infrastructure.adapter.in.web;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,16 +10,20 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pragma.crediya.request.application.dto.request.RegisterRequestDto;
+import pragma.crediya.request.application.dto.response.LoanTypeDto;
 import pragma.crediya.request.application.dto.response.RegisterRequestResponseDto;
+import pragma.crediya.request.application.dto.response.StatusDto;
 import pragma.crediya.request.application.handler.RegisterRequestHandler;
+import pragma.crediya.request.application.useCase.ApproveRejectRequestUseCase;
 import pragma.crediya.user.application.dto.response.ErrorResponseDto;
 import pragma.crediya.user.infrastructure.service.AuthorizationService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +33,8 @@ public class RequestController {
 
     private final RegisterRequestHandler registerRequestHandler;
     private final AuthorizationService authorizationService;
+    private final RegisterRequestHandler handler;
+    private final ApproveRejectRequestUseCase approveRejectRequestUseCase;
 
     @PostMapping
     @Operation(
@@ -193,19 +198,15 @@ public class RequestController {
                             ))
                             }
                     )
-    public Mono<ResponseEntity<Flux<RegisterRequestResponseDto>>> getAllRequests() {
+    public Flux<RegisterRequestResponseDto> getAllRequests() {
         return ReactiveSecurityContextHolder.getContext()
                 .map(ctx -> ctx.getAuthentication())
-                .flatMap(auth -> {
-                    Flux<RegisterRequestResponseDto> requests;
-
+                .flatMapMany(auth -> {
                     if (authorizationService.canListAllRequests(auth)) {
-                        requests = registerRequestHandler.getAllRequestsForAdvisor();
+                        return registerRequestHandler.getAllRequestsForAdvisor();
                     } else {
-                        requests = registerRequestHandler.getRequestsByEmail(auth.getName());
+                        return registerRequestHandler.getRequestsByEmail(auth.getName());
                     }
-
-                    return Mono.just(ResponseEntity.ok(requests));
                 });
     }
 
@@ -299,18 +300,60 @@ public class RequestController {
                     )
             }
     )
-    public Mono<ResponseEntity<RegisterRequestResponseDto>> getRequestById(@PathVariable Long id) {
+    public Mono<ResponseEntity<?>> getRequestById(@PathVariable Long id) {
         return ReactiveSecurityContextHolder.getContext()
                 .map(ctx -> ctx.getAuthentication())
                 .flatMap(auth -> registerRequestHandler.getRequestById(id)
                         .flatMap(requestResp -> {
                             if (!authorizationService.canViewRequest(auth, requestResp.getEmail())) {
                                 return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                        .body(new RegisterRequestResponseDto(null, "No tiene permisos para ver esta solicitud")));
+                                        .body(new ErrorResponseDto("403", "No tiene permisos para ver esta solicitud", null)));
                             }
                             return Mono.just(ResponseEntity.ok(requestResp));
                         })
-                        .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()))
+                        .switchIfEmpty(Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(new ErrorResponseDto("404", "Solicitud no encontrada", "No existe una solicitud con el id " + id))))
                 );
+    }
+
+    @PutMapping("/{id}")
+    @Operation(
+            summary = "Aceptar o rechazar solicitud",
+            description = "Permite al asesor aprobar o rechazar una solicitud. Se notifica al cliente la decisión.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Solicitud actualizada y notificación enviada"
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "El usuario no tiene permisos para tomar esta decisión"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Solicitud no encontrada"
+                    )
+            }
+    )
+
+    public Mono<ResponseEntity<?>> updateStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, Long> body
+    ) {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ctx.getAuthentication())
+                .flatMap(auth -> {
+                    if (!authorizationService.canApproveRequest(auth)) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body(Map.of(
+                                        "codigo", "403",
+                                        "mensaje", "Solo los asesores pueden aprobar o rechazar solicitudes"
+                                )));
+                    }
+
+                    Long newStatusId = body.get("statusId");
+                    return handler.updateDecision(id, newStatusId)
+                            .map(ResponseEntity::ok);
+                });
     }
 }
